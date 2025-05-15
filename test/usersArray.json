@@ -1,0 +1,78 @@
+[
+  {
+    "firstName": "John",
+    "lastName": "Doe",
+    "country": "USA",
+    "city": "New York",
+    "email": "john.doe@example.com",
+    "timezone": "America/New_York",
+    "sendTimes": [
+      {
+        "time": "08:00",
+        "emailType": 1
+      },
+      {
+        "time": "14:00",
+        "emailType": 2
+      }
+    ],
+    "preferredDay": "Monday"
+  },
+  {
+    "firstName": "Jane",
+    "lastName": "Smith",
+    "country": "UK",
+    "city": "London",
+    "email": "jane.smith@example.com",
+    "timezone": "Europe/London",
+    "sendTimes": [
+      {
+        "time": "09:30",
+        "emailType": 3
+      },
+      {
+        "time": "15:00",
+        "emailType": 4
+      }
+    ],
+    "preferredDay": "Wednesday"
+  },
+  {
+    "firstName": "Alice",
+    "lastName": "Johnson",
+    "country": "Canada",
+    "city": "Toronto",
+    "email": "alice.johnson@example.com",
+    "timezone": "America/Toronto",
+    "sendTimes": [
+      {
+        "time": "10:00",
+        "emailType": 1
+      },
+      {
+        "time": "16:00",
+        "emailType": 2
+      }
+    ],
+    "preferredDay": "Friday"
+  },
+  {
+    "firstName": "Bob",
+    "lastName": "Brown",
+    "country": "Australia",
+    "city": "Sydney",
+    "email": "bob.brown@example.com",
+    "timezone": "Australia/Sydney",
+    "sendTimes": [
+      {
+        "time": "07:00",
+        "emailType": 5
+      },
+      {
+        "time": "13:00",
+        "emailType": 3
+      }
+    ],
+    "preferredDay": "Sunday"
+  }
+]
