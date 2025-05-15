@@ -11,11 +11,6 @@ const jobRouter = require("./routes/jobsRouter");
 require("dotenv").config();
 const app = express();
 
-app.use(morgan("dev"));
-app.use(express.json());
-app.use("/users", userRouter);
-app.use("/jobs", jobRouter);
-
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -23,6 +18,13 @@ mongoose
     startAgenda();
   })
   .catch((err) => console.error("MongoDB connection error:", err));
+
+app.use(morgan("dev"));
+app.use(express.json());
+app.use("/users", userRouter);
+app.use("/jobs", jobRouter);
+
+
 
 
 
