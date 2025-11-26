@@ -1,21 +1,21 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react'
 
 function UserList({ users, onEdit, onDelete, loading }) {
   // Add keyframes for spinner animation
   useEffect(() => {
-    const styleId = 'spinner-keyframes';
+    const styleId = 'spinner-keyframes'
     if (!document.getElementById(styleId)) {
-      const style = document.createElement('style');
-      style.id = styleId;
+      const style = document.createElement('style')
+      style.id = styleId
       style.textContent = `
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-      `;
-      document.head.appendChild(style);
+      `
+      document.head.appendChild(style)
     }
-  }, []);
+  }, [])
 
   if (loading) {
     return (

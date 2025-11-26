@@ -1,26 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { userService } from '../services/api';
+import { useEffect, useState } from 'react'
+import { useForm, useFieldArray } from 'react-hook-form'
+import { userService } from '../services/api.js'
 
-const validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
 function UserForm({ user, onSave, onCancel }) {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    country: '',
-    city: '',
-    preferredDay: '',
-    sendTimes: [{ time: '09:00', emailType: 1 }],
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const isEditMode = !!user
 
-  const isEditMode = !!user;
+  const { register, handleSubmit, control, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      country: '',
+      city: '',
+      preferredDay: '',
+      sendTimes: [{ time: '09:00', emailType: 1 }]
+    }
+  })
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: 'sendTimes'
+  })
 
   useEffect(() => {
     if (user) {
-      setFormData({
+      reset({
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         email: user.email || '',
@@ -28,69 +36,40 @@ function UserForm({ user, onSave, onCancel }) {
         city: user.city || '',
         preferredDay: user.preferredDay || '',
         sendTimes: user.sendTimes?.length > 0 
-          ? user.sendTimes.map(st => ({ ...st }))
-          : [{ time: '09:00', emailType: 1 }],
-      });
+          ? user.sendTimes.map(st => ({ time: st.time, emailType: st.emailType }))
+          : [{ time: '09:00', emailType: 1 }]
+      })
     }
-  }, [user]);
+  }, [user, reset])
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSendTimeChange = (index, field, value) => {
-    setFormData(prev => {
-      const newSendTimes = [...prev.sendTimes];
-      newSendTimes[index] = { ...newSendTimes[index], [field]: field === 'emailType' ? parseInt(value, 10) : value };
-      return { ...prev, sendTimes: newSendTimes };
-    });
-  };
-
-  const addSendTime = () => {
-    setFormData(prev => ({
-      ...prev,
-      sendTimes: [...prev.sendTimes, { time: '09:00', emailType: 1 }],
-    }));
-  };
-
-  const removeSendTime = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      sendTimes: prev.sendTimes.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const onSubmit = async (data) => {
+    setLoading(true)
+    setError('')
 
     try {
       if (isEditMode) {
-        // For edit mode, send only the changed fields (excluding email)
-        const updateData = {};
-        if (formData.firstName !== user.firstName) updateData.firstName = formData.firstName;
-        if (formData.lastName !== user.lastName) updateData.lastName = formData.lastName;
-        if (formData.country !== user.country || formData.city !== user.city) {
-          updateData.country = formData.country;
-          updateData.city = formData.city;
+        const updateData = {}
+        if (data.firstName !== user.firstName) updateData.firstName = data.firstName
+        if (data.lastName !== user.lastName) updateData.lastName = data.lastName
+        if (data.country !== user.country || data.city !== user.city) {
+          updateData.country = data.country
+          updateData.city = data.city
         }
-        if (formData.preferredDay !== user.preferredDay) {
-          updateData.preferredDay = formData.preferredDay || null;
+        if (data.preferredDay !== user.preferredDay) {
+          updateData.preferredDay = data.preferredDay || null
         }
         
-        await userService.updateUser(user.email, updateData);
+        await userService.updateUser(user.email, updateData)
       } else {
-        await userService.createUser(formData);
+        await userService.createUser(data)
       }
-      onSave();
+      onSave()
     } catch (err) {
-      setError(err.message);
+      setError(err.message)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <div style={styles.formContainer}>
@@ -98,29 +77,25 @@ function UserForm({ user, onSave, onCancel }) {
       
       {error && <div style={styles.error}>{error}</div>}
       
-      <form onSubmit={handleSubmit} style={styles.form}>
+      <form onSubmit={handleSubmit(onSubmit)} style={styles.form}>
         <div style={styles.formRow}>
           <div style={styles.formGroup}>
             <label style={styles.label}>First Name</label>
             <input
               type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleChange}
-              required
+              {...register('firstName', { required: 'First name is required' })}
               style={styles.input}
             />
+            {errors.firstName && <span style={styles.fieldError}>{errors.firstName.message}</span>}
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>Last Name</label>
             <input
               type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleChange}
-              required
+              {...register('lastName', { required: 'Last name is required' })}
               style={styles.input}
             />
+            {errors.lastName && <span style={styles.fieldError}>{errors.lastName.message}</span>}
           </div>
         </div>
 
@@ -128,13 +103,17 @@ function UserForm({ user, onSave, onCancel }) {
           <label style={styles.label}>Email</label>
           <input
             type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
+            {...register('email', { 
+              required: 'Email is required',
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: 'Invalid email address'
+              }
+            })}
             disabled={isEditMode}
             style={{ ...styles.input, ...(isEditMode ? styles.inputDisabled : {}) }}
           />
+          {errors.email && <span style={styles.fieldError}>{errors.email.message}</span>}
         </div>
 
         <div style={styles.formRow}>
@@ -142,34 +121,25 @@ function UserForm({ user, onSave, onCancel }) {
             <label style={styles.label}>Country</label>
             <input
               type="text"
-              name="country"
-              value={formData.country}
-              onChange={handleChange}
-              required
+              {...register('country', { required: 'Country is required' })}
               style={styles.input}
             />
+            {errors.country && <span style={styles.fieldError}>{errors.country.message}</span>}
           </div>
           <div style={styles.formGroup}>
             <label style={styles.label}>City</label>
             <input
               type="text"
-              name="city"
-              value={formData.city}
-              onChange={handleChange}
-              required
+              {...register('city', { required: 'City is required' })}
               style={styles.input}
             />
+            {errors.city && <span style={styles.fieldError}>{errors.city.message}</span>}
           </div>
         </div>
 
         <div style={styles.formGroup}>
           <label style={styles.label}>Preferred Day</label>
-          <select
-            name="preferredDay"
-            value={formData.preferredDay}
-            onChange={handleChange}
-            style={styles.input}
-          >
+          <select {...register('preferredDay')} style={styles.input}>
             <option value="">No preference</option>
             {validDays.map(day => (
               <option key={day} value={day}>{day}</option>
@@ -181,32 +151,33 @@ function UserForm({ user, onSave, onCancel }) {
           <div style={styles.sendTimesSection}>
             <div style={styles.sendTimesHeader}>
               <label style={styles.label}>Send Times</label>
-              <button type="button" onClick={addSendTime} style={styles.addButton}>
+              <button 
+                type="button" 
+                onClick={() => append({ time: '09:00', emailType: 1 })} 
+                style={styles.addButton}
+              >
                 + Add Time
               </button>
             </div>
-            {formData.sendTimes.map((sendTime, index) => (
-              <div key={index} style={styles.sendTimeRow}>
+            {fields.map((field, index) => (
+              <div key={field.id} style={styles.sendTimeRow}>
                 <input
                   type="time"
-                  value={sendTime.time}
-                  onChange={(e) => handleSendTimeChange(index, 'time', e.target.value)}
-                  required
+                  {...register(`sendTimes.${index}.time`, { required: true })}
                   style={styles.timeInput}
                 />
                 <select
-                  value={sendTime.emailType}
-                  onChange={(e) => handleSendTimeChange(index, 'emailType', e.target.value)}
+                  {...register(`sendTimes.${index}.emailType`, { valueAsNumber: true })}
                   style={styles.typeSelect}
                 >
                   {[1, 2, 3, 4, 5].map(type => (
                     <option key={type} value={type}>Type {type}</option>
                   ))}
                 </select>
-                {formData.sendTimes.length > 1 && (
+                {fields.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => removeSendTime(index)}
+                    onClick={() => remove(index)}
                     style={styles.removeButton}
                   >
                     ×
@@ -241,7 +212,7 @@ function UserForm({ user, onSave, onCancel }) {
         </div>
       </form>
     </div>
-  );
+  )
 }
 
 const styles = {
@@ -290,6 +261,11 @@ const styles = {
     backgroundColor: '#f5f5f5',
     color: '#888',
     cursor: 'not-allowed',
+  },
+  fieldError: {
+    color: '#c62828',
+    fontSize: '12px',
+    marginTop: '4px',
   },
   sendTimesSection: {
     marginTop: '8px',
@@ -397,6 +373,6 @@ const styles = {
     fontStyle: 'italic',
     margin: 0,
   },
-};
+}
 
-export default UserForm;
+export default UserForm

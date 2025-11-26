@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import UserList from './components/UserList';
-import UserForm from './components/UserForm';
-import { userService } from './services/api';
+import { useState, useEffect } from 'react'
+import UserList from './components/UserList.jsx'
+import UserForm from './components/UserForm.jsx'
+import { userService } from './services/api.js'
 
 function App() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [editingUser, setEditingUser] = useState(null)
   const [error, setError] = useState('');
 
   const fetchUsers = async () => {
