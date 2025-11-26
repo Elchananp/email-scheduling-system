@@ -31,12 +31,8 @@ app.use(express.static(path.join(__dirname, "frontend", "build")));
 app.use("/users", userRouter);
 app.use("/jobs", jobRouter);
 
-// Serve React app for any non-API routes
-app.get("*", (req, res, next) => {
-  // Skip if it's an API route
-  if (req.path.startsWith("/users") || req.path.startsWith("/jobs")) {
-    return next();
-  }
+// Serve React app for any non-API routes (only for GET requests to handle client-side routing)
+app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "build", "index.html"));
 });
 

@@ -217,6 +217,20 @@ function UserForm({ user, onSave, onCancel }) {
           </div>
         )}
 
+        {isEditMode && user.sendTimes?.length > 0 && (
+          <div style={styles.sendTimesInfo}>
+            <label style={styles.label}>Current Send Times</label>
+            <div style={styles.sendTimesList}>
+              {user.sendTimes.map((st, idx) => (
+                <span key={idx} style={styles.sendTimeTag}>
+                  {st.time} (Type {st.emailType})
+                </span>
+              ))}
+            </div>
+            <p style={styles.infoText}>Send times are managed separately via the Jobs API</p>
+          </div>
+        )}
+
         <div style={styles.buttonRow}>
           <button type="button" onClick={onCancel} style={styles.cancelButton}>
             Cancel
@@ -355,6 +369,33 @@ const styles = {
     borderRadius: '4px',
     marginBottom: '16px',
     fontSize: '14px',
+  },
+  sendTimesInfo: {
+    marginTop: '8px',
+    padding: '12px',
+    backgroundColor: '#f5f5f5',
+    borderRadius: '4px',
+  },
+  sendTimesList: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    marginTop: '8px',
+    marginBottom: '8px',
+  },
+  sendTimeTag: {
+    display: 'inline-block',
+    padding: '4px 8px',
+    backgroundColor: '#e3f2fd',
+    color: '#1976d2',
+    borderRadius: '4px',
+    fontSize: '12px',
+  },
+  infoText: {
+    fontSize: '12px',
+    color: '#666',
+    fontStyle: 'italic',
+    margin: 0,
   },
 };
 
